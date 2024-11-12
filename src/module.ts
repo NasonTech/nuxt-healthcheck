@@ -19,36 +19,37 @@ export default defineNuxtModule<ModuleOptions>({
 		readyz: true,
 		livez: true,
 	},
-	async setup(_options, _nuxt) {
+	async setup(options, nuxt) {
 		const resolver = createResolver(import.meta.url)
 
-		_nuxt.options.runtimeConfig.healthcheck = defu(_nuxt.options.runtimeConfig.healthcheck, _options)
+		nuxt.options.runtimeConfig.healthcheck = defu(nuxt.options.runtimeConfig.healthcheck, options)
 
 		addServerHandler({
 			route: `/livez`,
-			handler: resolver.resolve('./runtime/server/routes/livez.get.ts'),
+			handler: resolver.resolve('./runtime/server/routes/livez.get'),
 			method: 'get',
 		})
 
 		addServerHandler({
 			route: `/readyz`,
-			handler: resolver.resolve('./runtime/server/routes/readyz.get.ts'),
+			handler: resolver.resolve('./runtime/server/routes/readyz.get'),
 			method: 'get',
 		})
 
-		addServerImportsDir(resolver.resolve('runtime/server/utils'))
+		addServerImportsDir(resolver.resolve('./runtime/server/utils'))
 
-		const healthchecks = await scanFolder(_nuxt, resolver, 'server/healthchecks')
+		const healthchecks = await scanFolder(nuxt, resolver, 'server/healthchecks')
 		createTemplateNuxtPlugin(healthchecks)
 
-		addServerPlugin(resolver.resolve(_nuxt.options.buildDir, '0.healthchecks-nuxt-plugin'))
+		addServerPlugin(resolver.resolve(nuxt.options.buildDir, '0.healthchecks-nuxt-plugin'))
 
-		_nuxt.options.build.transpile.push(resolver.resolve('runtime'))
+		nuxt.options.build.transpile.push(resolver.resolve('./runtime'))
 	},
 })
 
 export const scanFolder = async (nuxt: Nuxt, resolver: Resolver, path: string): Promise<string[]> => {
-	const resolvedPath = resolver.resolve(nuxt.options.srcDir, path)
+	const resolvedPath = resolver.resolve(nuxt.options.rootDir, path)
+	console.log(`scanning ${resolvedPath}`)
 
 	const files: string[] = []
 
