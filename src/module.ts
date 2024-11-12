@@ -49,7 +49,6 @@ export default defineNuxtModule<ModuleOptions>({
 
 export const scanFolder = async (nuxt: Nuxt, resolver: Resolver, path: string): Promise<string[]> => {
 	const resolvedPath = resolver.resolve(nuxt.options.rootDir, path)
-	console.log(`scanning ${resolvedPath}`)
 
 	const files: string[] = []
 
